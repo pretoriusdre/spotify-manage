@@ -1,0 +1,19 @@
+# Save this file as '.env' and update the values accordingly
+
+
+# These credenials are given when setting up the API. See:
+# https://developer.spotify.com/dashboard
+SPOTIPY_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxx
+SPOTIPY_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxx
+
+# Set this in your API
+SPOTIPY_REDIRECT_URI=http://localhost:8080
+
+# Copy link to your profile, then extract as follows:
+# https://open.spotify.com/user/{SPOTIPY_USERNAME}?si=ignore_this
+SPOTIPY_USERNAME=xxxxxxxxxxxxxxxxxxxxxx
+
+# Copy link to your target playlist, then extract as follows:
+# https://open.spotify.com/playlist/{SPOTIPY_RANDOM_PLAYLIST_ID}?si=ignore_this
+# This target playlist will be wiped and replaced with your liked songs, in a random order.
+SPOTIPY_RANDOM_PLAYLIST_ID=xxxxxxxxxxxxxxxxxxxxxx
