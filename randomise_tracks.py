@@ -7,26 +7,26 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Refer to .env file for these
-SPOTIPY_CLIENT_ID = os.environ.get('SPOTIPY_CLIENT_ID')
-SPOTIPY_CLIENT_SECRET = os.environ.get('SPOTIPY_CLIENT_SECRET')
-SPOTIPY_REDIRECT_URI = os.environ.get('SPOTIPY_REDIRECT_URI')
-SPOTIPY_USERNAME = os.environ.get('SPOTIPY_USERNAME')
-SPOTIPY_RANDOM_PLAYLIST_ID = os.environ.get('SPOTIPY_RANDOM_PLAYLIST_ID')
+SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID')
+SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET')
+SPOTIFY_REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI')
+SPOTIFY_USERNAME = os.environ.get('SPOTIFY_USERNAME')
+SPOTIFY_RANDOM_PLAYLIST_ID = os.environ.get('SPOTIFY_RANDOM_PLAYLIST_ID')
 
 # Other constants
-SPOTIPY_SCOPE = 'user-library-read playlist-modify-public playlist-modify-private user-library-modify'
+SPOTIFY_SCOPE = 'user-library-read playlist-modify-public playlist-modify-private user-library-modify'
 CHUNK_SIZE = 100
 
-
+# Class to randomise spotify playlists
 class SpotifyRandomiser:
-
+    """Randomise spotify playlists"""
     def __init__(self):
         self.sp = spotipy.Spotify(
             auth_manager=SpotifyOAuth(
-                client_id=SPOTIPY_CLIENT_ID,
-                client_secret=SPOTIPY_CLIENT_SECRET,
-                redirect_uri=SPOTIPY_REDIRECT_URI,
-                scope=SPOTIPY_SCOPE,
+                client_id=SPOTIFY_CLIENT_ID,
+                client_secret=SPOTIFY_CLIENT_SECRET,
+                redirect_uri=SPOTIFY_REDIRECT_URI,
+                scope=SPOTIFY_SCOPE,
             )
         )
 
@@ -118,17 +118,16 @@ class SpotifyRandomiser:
         print('Program complete.')
 
 
-
 def make_nadia_another_playlist():
     """Takes tracks from the staging playlist and puts a selection
-    into a target playlist, excluding previous inclusions"""
-    SPOTIPY_NADIA_STAGING = os.environ.get('SPOTIPY_NADIA_STAGING')
-    SPOTIPY_NADIA_1 = os.environ.get('SPOTIPY_NADIA_1')
-    SPOTIPY_NADIA_2 = os.environ.get('SPOTIPY_NADIA_2')
+    into a new playlist, excluding previous inclusions"""
+    SPOTIFY_NADIA_STAGING = os.environ.get('SPOTIFY_NADIA_STAGING')
+    SPOTIFY_NADIA_1 = os.environ.get('SPOTIFY_NADIA_1')
+    SPOTIFY_NADIA_2 = os.environ.get('SPOTIFY_NADIA_2')
 
-    source = SPOTIPY_NADIA_STAGING_PLAYLIST_ID
-    target = SPOTIPY_NADIA_2
-    exclude = [SPOTIPY_NADIA_1]
+    source = SPOTIFY_NADIA_STAGING  # Selected tracks
+    target = SPOTIFY_NADIA_2        # Next playlist
+    exclude = [SPOTIFY_NADIA_1]     # Previous playlists
     max_tracks = 20
     sp_rand = SpotifyRandomiser()
     sp_rand.randomise(
@@ -138,17 +137,20 @@ def make_nadia_another_playlist():
         max_tracks=max_tracks
         )
 
-
-def randomize_liked_tracks():
+def randomise_liked_tracks():
     """Takes liked songs and puts them into a target playlist"""
     source = 'liked'
-    target = SPOTIPY_RANDOM_PLAYLIST_ID
+    target = SPOTIFY_RANDOM_PLAYLIST_ID
     exclude = None
     max_tracks = None
     sp_rand = SpotifyRandomiser()
-    sp_rand.randomise(source='liked', target=SPOTIPY_RANDOM_PLAYLIST_ID, exclude=exclude, max_tracks=max_tracks)
-
+    sp_rand.randomise(
+        source='liked',
+        target=SPOTIFY_RANDOM_PLAYLIST_ID,
+        exclude=exclude,
+        max_tracks=max_tracks
+        )
 
 if __name__ == '__main__':
-    randomize_liked_tracks()
-    #make_nadia_another_playlist()
+    # randomise_liked_tracks()
+    make_nadia_another_playlist()
