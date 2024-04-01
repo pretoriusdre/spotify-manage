@@ -120,8 +120,9 @@ class SpotifyRandomiser:
 
 
 def make_nadia_another_playlist():
-    """Takes songs from a staging playlist and puts some of them into a target playlist, excluding songs that have been used before in previous playlists"""
-    SPOTIPY_NADIA_STAGING_PLAYLIST_ID = os.environ.get('SPOTIPY_NADIA_STAGING_PLAYLIST_ID')
+    """Takes tracks from the staging playlist and puts a selection
+    into a target playlist, excluding previous inclusions"""
+    SPOTIPY_NADIA_STAGING = os.environ.get('SPOTIPY_NADIA_STAGING')
     SPOTIPY_NADIA_1 = os.environ.get('SPOTIPY_NADIA_1')
     SPOTIPY_NADIA_2 = os.environ.get('SPOTIPY_NADIA_2')
 
@@ -130,7 +131,12 @@ def make_nadia_another_playlist():
     exclude = [SPOTIPY_NADIA_1]
     max_tracks = 20
     sp_rand = SpotifyRandomiser()
-    sp_rand.randomise(source=source, target=target, exclude=exclude, max_tracks=max_tracks)
+    sp_rand.randomise(
+        source=source,
+        target=target,
+        exclude=exclude,
+        max_tracks=max_tracks
+        )
 
 
 def randomize_liked_tracks():
