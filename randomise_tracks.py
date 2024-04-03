@@ -85,8 +85,10 @@ class SpotifyRandomiser:
         print(' done')
 
 
-    def randomise(self, source, target, exclude=None, max_tracks=None):
+    def randomise(self, source, target, exclude=None, max_tracks=None, force_include=None):
         print('Starting program')
+
+        force_include = force_include or []
 
         if source == 'liked':
             source_tracks = self.get_liked_tracks()
@@ -112,6 +114,9 @@ class SpotifyRandomiser:
             else:
                 self.remove_tracks_from_playlist(playlist_id=target, tracks=current_tracks)
 
+        source_tracks = [track for track in source_tracks if track not in force_include]
+        source_tracks = force_include + source_tracks
+
         if max_tracks:
             source_tracks = source_tracks[:max_tracks]
         self.add_tracks_to_playlist(playlist_id=target, tracks=source_tracks)
@@ -124,17 +129,25 @@ def make_nadia_another_playlist():
     SPOTIFY_NADIA_STAGING = os.environ.get('SPOTIFY_NADIA_STAGING')
     SPOTIFY_NADIA_1 = os.environ.get('SPOTIFY_NADIA_1')
     SPOTIFY_NADIA_2 = os.environ.get('SPOTIFY_NADIA_2')
+    SPOTIFY_NADIA_3 = os.environ.get('SPOTIFY_NADIA_3')
+
 
     source = SPOTIFY_NADIA_STAGING  # Selected tracks
-    target = SPOTIFY_NADIA_2        # Next playlist
-    exclude = [SPOTIFY_NADIA_1]     # Previous playlists
+    target = SPOTIFY_NADIA_3        # Next playlist
+    exclude = [
+        SPOTIFY_NADIA_1, 
+        SPOTIFY_NADIA_2
+        ]                           # Previous playlists
+    force_include = []              # Specific track ID that I want to be included (will be put at start)
+
     max_tracks = 20
     sp_rand = SpotifyRandomiser()
     sp_rand.randomise(
         source=source,
         target=target,
         exclude=exclude,
-        max_tracks=max_tracks
+        max_tracks=max_tracks,
+        force_include=force_include
         )
 
 def randomise_liked_tracks():
