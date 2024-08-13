@@ -1,0 +1,27 @@
+{
+    "source_playlists" : {
+        "xxxxxxxxxxxxxxxxxxxxxx" : "For xxxx - Staging Area"
+    },
+    "previous_playlists" : {
+        "xxxxxxxxxxxxxxxxxxxxx1" : "For xxxx #01 - Name of playlist",
+        "xxxxxxxxxxxxxxxxxxxxx2" : "For xxxx #02 - Name of playlist",
+        "xxxxxxxxxxxxxxxxxxxxx3" : "For xxxx #03 - Name of playlist",
+        "xxxxxxxxxxxxxxxxxxxxx4" : "For xxxx #04 - Name of playlist"
+    },
+
+    "received_playlists" : {
+        "xxxxxxxxxxxxxxxxxxxxx1" : "For me #01 - Name of playlist",
+        "xxxxxxxxxxxxxxxxxxxxx2" : "For me #02 - Name of playlist",
+        "xxxxxxxxxxxxxxxxxxxxx3" : "For me #03 - Name of playlist",
+        "xxxxxxxxxxxxxxxxxxxxx4" : "For me #04 - Name of playlist"
+    },
+
+    "include_track_ids" : {
+        "xxxxxxxxxxxxxxxxxxxxxx" : "Include this track"
+    },
+
+    "target_playlist" : {
+        "xxxxxxxxxxxxxxxxxxxxx5" : "For xxxx #05 - Playlist to be overwritten"
+    }
+
+}

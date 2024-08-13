@@ -1,3 +1,8 @@
+output_files/*
+!output_files/.gitkeep
+
+make_someone_another_playlist.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
