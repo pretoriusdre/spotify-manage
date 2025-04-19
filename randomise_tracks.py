@@ -132,29 +132,6 @@ class SpotifyManager:
         print(' done')
 
 
-    def get_random_recommendations(self):
-
-        source_tracks = self.get_liked_tracks()
-        random.shuffle(source_tracks)
-        # Splt into batches of five tracks
-        chunk_size_for_recs = 5
-        all_recommendations = []
-
-        for i in range(0, len(source_tracks), chunk_size_for_recs):
-            seed_tracks = source_tracks[i : i + chunk_size_for_recs]
-            if i > 100:
-                break
-            seed_tracks_ids = self.get_track_ids(seed_tracks)
-            track_recommendations = self.sp.recommendations(seed_artists=None, seed_genres=None, seed_tracks=seed_tracks_ids, limit=20, country=None)['tracks']
-            track_recommendations = [{'track': data} for data in track_recommendations]
-            all_recommendations.extend(track_recommendations)
-
-        df =  self.get_tracks_metadata_df(all_recommendations)
-        output_file = self.output_directory / 'random_recommendations.xlsx'
-        df.to_excel(output_file, index=False)
-        os.startfile(output_file)
-
-
     def randomise(self, source, target, exclude_playlist_ids=None, include_track_ids=None, max_tracks=None):
         print('Starting program')
 
@@ -302,8 +279,6 @@ class SpotifyManager:
 
         if result.upper() == 'L':
             self.randomise_liked_tracks()
-        elif result.upper() == 'R':
-            self.get_random_recommendations()
         elif result.upper() == 'S':
             self.make_someone_another_playlist()
 
