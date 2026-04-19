@@ -1,23 +1,21 @@
-[tool.poetry]
+[project]
 name = "spotify-manage"
 version = "0.1.0"
 description = ""
-authors = ["Andre <pretorius.dre+github@gmail.com>"]
+authors = [{ name = "Andre", email = "pretorius.dre+github@gmail.com" }]
 readme = "README.md"
-
-
-package-mode = false
-
-
-[tool.poetry.dependencies]
-python = "^3.12"
-spotipy = "^2.24.0"
-python-dotenv = "^1.0.1"
-pandas = "^2.2.2"
-openpyxl = "^3.1.5"
-ipykernel = "^6.29.5"
-
+requires-python = ">=3.12"
+dependencies = [
+    "spotipy>=2.24.0",
+    "python-dotenv>=1.0.1",
+    "pandas>=2.2.2",
+    "openpyxl>=3.1.5",
+    "ipykernel>=6.29.5",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = []
