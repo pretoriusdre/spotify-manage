@@ -7,7 +7,7 @@ SPOTIFY_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxx
 SPOTIFY_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxx
 
 # Set this in your API
-SPOTIFY_REDIRECT_URI=http://localhost:8080
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:8888/callback
 
 # Copy link to your profile, then extract as follows:
 # https://open.spotify.com/user/{SPOTIFY_USERNAME}?si=ignore_this
@@ -17,3 +17,23 @@ SPOTIFY_USERNAME=xxxxxxxxxxxxxxxxxxxxxx
 # https://open.spotify.com/playlist/{SPOTIFY_RANDOM_PLAYLIST_ID}?si=ignore_this
 # This target playlist will be wiped and replaced with your liked songs, in a random order.
 SPOTIFY_RANDOM_PLAYLIST_ID=xxxxxxxxxxxxxxxxxxxxxx
+
+# Path to your Spotify SQLite database.
+# Windows: SPOTIFY_DATABASE_PATH=C:\code\spotify-manage\spotify-database.db
+# Pi:      SPOTIFY_DATABASE_PATH=/root/spotify-manage/spotify-database.db
+# If unset, defaults to 'spotify-database.db' in the working directory.
+SPOTIFY_DATABASE_PATH=spotify-database.db
+
+# Target playlist for the database-sourced random selection
+# https://open.spotify.com/playlist/{SPOTIFY_INFINITE_STEW_PLAYLIST_ID}?si=ignore_this
+SPOTIFY_INFINITE_STEW_PLAYLIST_ID=xxxxxxxxxxxxxxxxxxxxxx
+
+# Number of tracks to add from the database each time (optional, prompts if not set)
+SPOTIFY_DB_N_TRACKS=30
+
+# Number of existing tracks to retain when refreshing the database playlist (optional, defaults to 1)
+SPOTIFY_DB_RETAIN_TRACKS=1
+
+# ntfy.sh topic for failure notifications (pick something unguessable, e.g. spotify-stew-xk7r2p)
+# Subscribe to this topic in the ntfy app on your phone.
+NTFY_TOPIC=spotify-stew-xxxxxxxxxxxx

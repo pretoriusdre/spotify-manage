@@ -1,6 +1,12 @@
 output_files/*
 !output_files/.gitkeep
 
+# SQLite database (local file, not committed)
+*.db
+
+# Runtime logs
+logs/
+
 make_someone_another_playlist.json
 
 # Byte-compiled / optimized / DLL files

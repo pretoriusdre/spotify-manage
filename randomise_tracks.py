@@ -7,6 +7,8 @@ import pandas as pd
 import json
 from pathlib import Path
 
+from spotify_database import SpotifyDatabaseWrapper
+
 load_dotenv()
 
 # Refer to .env file for these
@@ -16,6 +18,9 @@ SPOTIFY_REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI')
 SPOTIFY_USERNAME = os.environ.get('SPOTIFY_USERNAME')
 
 SPOTIFY_RANDOM_PLAYLIST_ID = os.environ.get('SPOTIFY_RANDOM_PLAYLIST_ID')
+SPOTIFY_DB_PLAYLIST_ID     = os.environ.get('SPOTIFY_INFINITE_STEW_PLAYLIST_ID')
+SPOTIFY_DB_N_TRACKS        = os.environ.get('SPOTIFY_DB_N_TRACKS')
+SPOTIFY_DB_RETAIN_TRACKS   = os.environ.get('SPOTIFY_DB_RETAIN_TRACKS')
 
 # Other constants
 SPOTIFY_SCOPE = 'user-library-read playlist-modify-public playlist-modify-private user-library-modify'
@@ -132,7 +137,7 @@ class SpotifyManager:
         print(' done')
 
 
-    def randomise(self, source, target, exclude_playlist_ids=None, include_track_ids=None, max_tracks=None):
+    def randomise(self, source, target, exclude_playlist_ids=None, include_track_ids=None, max_tracks=None, require_confirmation=True):
         print('Starting program')
 
         include_track_ids = include_track_ids or []
@@ -162,11 +167,11 @@ class SpotifyManager:
         target_name = self.get_playlist_name(target)
 
         if current_track_ids_len > 0:
-            user_input = input(f'Target playlist, {target_name}, contains {current_track_ids_len} tracks. Type "X" to confirm overwrite:\n')
-            if user_input.upper() != 'X':
-                raise ValueError('Target is not empty')
-            else:
-                self.remove_track_ids_from_playlist(playlist_id=target, track_ids=current_track_ids)
+            if require_confirmation:
+                user_input = input(f'Target playlist, {target_name}, contains {current_track_ids_len} tracks. Type "X" to confirm overwrite:\n')
+                if user_input.upper() != 'X':
+                    raise ValueError('Target is not empty')
+            self.remove_track_ids_from_playlist(playlist_id=target, track_ids=current_track_ids)
 
         source_track_ids = include_track_ids + [track_id for track_id in source_track_ids if track_id not in include_track_ids]
 
@@ -177,7 +182,7 @@ class SpotifyManager:
         print('Program complete.')
 
 
-    def randomise_liked_tracks(self):
+    def randomise_liked_tracks(self, require_confirmation=True):
         """Takes liked songs and puts them into a target playlist"""
         source = 'liked'
         target = SPOTIFY_RANDOM_PLAYLIST_ID
@@ -190,7 +195,8 @@ class SpotifyManager:
             target=target,
             exclude_playlist_ids=exclude_playlist_ids,
             include_track_ids=include_track_ids,
-            max_tracks=max_tracks
+            max_tracks=max_tracks,
+            require_confirmation=require_confirmation
             )
   
 
@@ -264,14 +270,78 @@ class SpotifyManager:
         os.startfile(output_file)
 
 
+    @staticmethod
+    def _compute_weights(df):
+        from datetime import datetime, timezone
+        now = datetime.now(timezone.utc)
+
+        def row_weight(row):
+            if pd.isnull(row['last_added_at']) or row['times_added'] == 0:
+                return 1.0
+            try:
+                last = pd.to_datetime(row['last_added_at'], utc=True)
+                days_since = (now - last).days
+            except Exception:
+                return 1.0
+            penalty = row['times_added'] / (1 + days_since / 30)
+            return 1.0 / (1 + penalty)
+
+        return df.apply(row_weight, axis=1)
+
+    def populate_from_database(self, n=None, playlist_id=None):
+        if playlist_id is None:
+            playlist_id = SPOTIFY_DB_PLAYLIST_ID
+        if not playlist_id:
+            raise ValueError("Set SPOTIFY_INFINITE_STEW_PLAYLIST_ID in .env")
+
+        if n is None:
+            n = int(SPOTIFY_DB_N_TRACKS) if SPOTIFY_DB_N_TRACKS else int(input("How many tracks to add from the database? "))
+
+        db = SpotifyDatabaseWrapper()
+        df = db.get_tracks_for_weighted_selection()
+
+        if len(df) == 0:
+            print("No eligible tracks found in database.")
+            return
+
+        current_tracks = self.get_playlist_tracks(playlist_id)
+        current_ids = self.get_track_ids(current_tracks)
+        retain_n = int(SPOTIFY_DB_RETAIN_TRACKS) if SPOTIFY_DB_RETAIN_TRACKS else 1
+        kept_ids = []
+        if current_ids:
+            kept_ids = random.sample(current_ids, min(retain_n, len(current_ids)))
+            print(f"Keeping {len(kept_ids)} existing track(s), removing {len(current_ids) - len(kept_ids)} others.")
+
+        if current_ids:
+            self.remove_track_ids_from_playlist(playlist_id, current_ids)
+
+        kept_uris = {f"spotify:track:{tid}" for tid in kept_ids}
+        if kept_uris:
+            df = df[~df['uri'].isin(kept_uris)]
+
+        n = min(n, len(df))
+        weights = self._compute_weights(df)
+        selected_df = df.sample(n=n, weights=weights / weights.sum(), replace=False)
+        selected_uris = selected_df['uri'].tolist()
+        selected_ids = [uri.split(':')[-1] for uri in selected_uris]
+
+        all_ids = kept_ids + selected_ids
+        random.shuffle(all_ids)
+        self.add_track_ids_to_playlist(playlist_id, all_ids)
+        db.update_selected_tracks(selected_uris)
+        kept_uris = [f"spotify:track:{tid}" for tid in kept_ids]
+        db.save_stew_history(kept_uris + selected_uris)
+        print("populate_from_database complete.")
+
     def main(self):
-        
+
         message = """
         Spotify Manager.
-            
+
             - Type 'L' to randomise [L]iked songs, saving to the target playlist.
             - Type 'R' to get random [R]ecommendations.
             - Type 'S' to make [S]omeone another playlist, drawing tracks from their staging area.
+            - Type 'D' to populate the [D]atabase playlist with weighted-random tracks.
 
         """
 
@@ -281,6 +351,8 @@ class SpotifyManager:
             self.randomise_liked_tracks()
         elif result.upper() == 'S':
             self.make_someone_another_playlist()
+        elif result.upper() == 'D':
+            self.populate_from_database()
 
         #spotipy_manager.delete_liked_dupe_tracks()
 
