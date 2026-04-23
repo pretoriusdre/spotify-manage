@@ -13,8 +13,9 @@ echo "--- $(date '+%Y-%m-%d %H:%M:%S') START ---"
 # cd is critical: SpotifyOAuth reads .cache from cwd; load_dotenv() searches upward from cwd
 cd "$REPO_DIR"
 
-if ! "$PYTHON" run_stew.py; then
-    EXIT_CODE=$?
+EXIT_CODE=0
+"$PYTHON" run_stew.py || EXIT_CODE=$?
+if [ "$EXIT_CODE" -ne 0 ]; then
     curl -s \
         -H "Title: spotify-manage failed" \
         -H "Priority: high" \
