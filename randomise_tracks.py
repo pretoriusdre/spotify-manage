@@ -19,8 +19,9 @@ SPOTIFY_USERNAME = os.environ.get('SPOTIFY_USERNAME')
 
 SPOTIFY_RANDOM_PLAYLIST_ID = os.environ.get('SPOTIFY_RANDOM_PLAYLIST_ID')
 SPOTIFY_DB_PLAYLIST_ID     = os.environ.get('SPOTIFY_INFINITE_STEW_PLAYLIST_ID')
-SPOTIFY_DB_N_TRACKS        = os.environ.get('SPOTIFY_DB_N_TRACKS')
-SPOTIFY_DB_RETAIN_TRACKS   = os.environ.get('SPOTIFY_DB_RETAIN_TRACKS')
+SPOTIFY_DB_N_TRACKS              = os.environ.get('SPOTIFY_DB_N_TRACKS')
+SPOTIFY_DB_RETAIN_TRACKS         = os.environ.get('SPOTIFY_DB_RETAIN_TRACKS')
+SPOTIFY_LEFTOVER_STEW_PLAYLIST_ID = os.environ.get('SPOTIFY_LEFTOVER_INFINITE_STEW_PLAYLIST_ID')
 
 # Other constants
 SPOTIFY_SCOPE = 'user-library-read playlist-modify-public playlist-modify-private user-library-modify'
@@ -288,7 +289,7 @@ class SpotifyManager:
 
         return df.apply(row_weight, axis=1)
 
-    def populate_from_database(self, n=None, playlist_id=None):
+    def cook_perpetual_stew(self, n=None, playlist_id=None):
         if playlist_id is None:
             playlist_id = SPOTIFY_DB_PLAYLIST_ID
         if not playlist_id:
@@ -331,7 +332,30 @@ class SpotifyManager:
         db.update_selected_tracks(selected_uris)
         kept_uris = [f"spotify:track:{tid}" for tid in kept_ids]
         db.save_stew_history(kept_uris + selected_uris)
-        print("populate_from_database complete.")
+        print("cook_perpetual_stew complete.")
+
+    def copy_stew_to_leftovers(self, days=7):
+        playlist_id = SPOTIFY_LEFTOVER_STEW_PLAYLIST_ID
+        if not playlist_id:
+            raise ValueError("Set SPOTIFY_LEFTOVER_INFINITE_STEW_PLAYLIST_ID in .env")
+
+        db = SpotifyDatabaseWrapper()
+        df = db.get_recent_stew_tracks(days=days)
+
+        if df.empty:
+            print(f"No stew tracks found in the last {days} days.")
+            return
+
+        track_ids = [uri.split(':')[-1] for uri in df['uri']]
+        print(f"Found {len(track_ids)} track(s) from the last {days} days.")
+
+        current_tracks = self.get_playlist_tracks(playlist_id)
+        current_ids = self.get_track_ids(current_tracks)
+        if current_ids:
+            self.remove_track_ids_from_playlist(playlist_id, current_ids)
+
+        self.add_track_ids_to_playlist(playlist_id, track_ids)
+        print("copy_stew_to_leftovers complete.")
 
     def main(self):
 
@@ -352,7 +376,7 @@ class SpotifyManager:
         elif result.upper() == 'S':
             self.make_someone_another_playlist()
         elif result.upper() == 'D':
-            self.populate_from_database()
+            self.cook_perpetual_stew()
 
         #spotipy_manager.delete_liked_dupe_tracks()
 

@@ -28,6 +28,10 @@ SPOTIFY_DATABASE_PATH=spotify-database.db
 # https://open.spotify.com/playlist/{SPOTIFY_INFINITE_STEW_PLAYLIST_ID}?si=ignore_this
 SPOTIFY_INFINITE_STEW_PLAYLIST_ID=xxxxxxxxxxxxxxxxxxxxxx
 
+# Last week of playlists, the leftovers                                                                                                                                                                                                                          
+SPOTIFY_LEFTOVER_INFINITE_STEW_PLAYLIST_ID=xxxxxxxxxxxxxxxxxxxxxx
+
+
 # Number of tracks to add from the database each time (optional, prompts if not set)
 SPOTIFY_DB_N_TRACKS=30
 

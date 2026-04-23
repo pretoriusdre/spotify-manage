@@ -123,6 +123,16 @@ class SpotifyDatabaseWrapper(SQLiteWrapper):
             [(uri, playlist_date) for uri in uris]
         )
 
+    def get_recent_stew_tracks(self, days=7):
+        query = """
+            SELECT uri
+            FROM stew_history
+            WHERE playlist_date >= datetime('now', ?)
+            GROUP BY uri
+            ORDER BY MIN(playlist_date)
+        """
+        return self.get_query(query, parameters=(f'-{days} days',))
+
     def update_selected_tracks(self, uris):
         now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
         statement = """

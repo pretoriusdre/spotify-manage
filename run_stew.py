@@ -3,6 +3,7 @@ load_dotenv()
 
 from randomise_tracks import SpotifyManager
 
-SpotifyManager().populate_from_database()
-
-SpotifyManager().randomise_liked_tracks(require_confirmation=False)
+manager = SpotifyManager()
+manager.cook_perpetual_stew()
+manager.copy_stew_to_leftovers()
+manager.randomise_liked_tracks(require_confirmation=False)
